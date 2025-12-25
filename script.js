@@ -1,10 +1,12 @@
-// 1. จัดเตรียมข้อมูลทีม (โหลดจาก LocalStorage หรือสร้างใหม่)
-let teams = JSON.parse(localStorage.getItem('val_teams_data')) || Array.from({length: 16}, (_, i) => ({
+// บรรทัดนี้ใช้สำหรับฝังข้อมูลให้คนอื่นเห็น (นำ JSON ที่คัดลอกมาวางแทนที่ null)
+const INITIAL_DATA = null; 
+
+let teams = JSON.parse(localStorage.getItem('val_teams_data')) || (INITIAL_DATA ? INITIAL_DATA.teams : Array.from({length: 16}, (_, i) => ({
     id: `team-${i}`,
     name: `TEAM ${String(i+1).padStart(2, '0')}`,
     logo: `https://api.dicebear.com/7.x/identicon/svg?seed=${i}`
-}));
-// ฟังก์ชัน ซ่อน/แสดง เมนู
+})));
+
 function toggleAdmin() {
     const panel = document.getElementById('admin-panel');
     const icon = document.getElementById('toggle-icon');
@@ -12,39 +14,28 @@ function toggleAdmin() {
     icon.innerText = panel.classList.contains('hidden-panel') ? '▶' : '◀';
 }
 
-// ฟังก์ชันสำหรับดึงข้อมูลทั้งหมดออกมาเป็นข้อความ (JSON)
 function exportJSON() {
-    const state = {
-        teams: teams,
-        ui: {}
-    };
+    const state = { teams: teams, ui: {} };
     document.querySelectorAll('.slot').forEach(slot => {
         state.ui[slot.id] = slot.innerHTML;
     });
-    
     const dataStr = JSON.stringify(state);
     navigator.clipboard.writeText(dataStr);
-    alert("คัดลอกข้อมูลสายการแข่งลง Clipboard แล้ว! คุณสามารถส่งข้อความนี้ให้เพื่อนได้");
+    alert("คัดลอกข้อมูลสายการแข่งแล้ว!");
 }
 
-// ฟังก์ชันสำหรับวางข้อมูลจากที่อื่นลงไป
 function importJSON() {
-    const dataStr = prompt("วางข้อมูล JSON ที่คัดลอกมาที่นี่:");
+    const dataStr = prompt("วางข้อมูล JSON ที่นี่:");
     if (dataStr) {
         try {
             const state = JSON.parse(dataStr);
             localStorage.setItem('val_teams_data', JSON.stringify(state.teams));
             localStorage.setItem('val_bracket_ui', JSON.stringify(state.ui));
-            location.reload(); // รีโหลดเพื่อแสดงผลใหม่
-        } catch (e) {
-            alert("ข้อมูลไม่ถูกต้อง!");
-        }
+            location.reload();
+        } catch (e) { alert("ข้อมูลผิดพลาด!"); }
     }
 }
 
-// (ฟังก์ชัน saveAll, loadAll, refreshInitialSeeds อื่นๆ ยังคงเดิมตามที่ให้ไว้คราวก่อน)
-
-// 2. ฟังก์ชันเรนเดอร์รายการทีมใน Admin Panel
 function renderAdmin() {
     const list = document.getElementById('team-list');
     list.innerHTML = '';
@@ -53,21 +44,19 @@ function renderAdmin() {
         div.className = 'input-card';
         div.innerHTML = `
             <p class="text-[10px] text-gray-500 mb-1 uppercase font-bold">Slot ${i+1}</p>
-            <input type="text" value="${team.name}" onchange="updateTeamName(${i}, this.value)" placeholder="ชื่อทีม">
-            <label class="text-[10px] text-gray-400 block mb-1">เปลี่ยนโลโก้:</label>
-            <input type="file" accept="image/*" class="text-[10px] w-full text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-[#ff4655] file:text-white" onchange="handleLogo(${i}, this)">
+            <input type="text" value="${team.name}" onchange="updateTeamName(${i}, this.value)">
+            <input type="file" accept="image/*" class="text-[10px] w-full" onchange="handleLogo(${i}, this)">
         `;
         list.appendChild(div);
     });
 }
 
-// 3. จัดการการอัปโหลดรูปภาพ
 function handleLogo(index, input) {
     const file = input.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            teams[index].logo = e.target.result; // เก็บเป็น Base64
+            teams[index].logo = e.target.result;
             refreshInitialSeeds();
             saveAll();
         };
@@ -81,11 +70,9 @@ function updateTeamName(index, value) {
     saveAll();
 }
 
-// 4. แสดงผลทีมในรอบที่ 1
 function refreshInitialSeeds() {
     for(let i=0; i<16; i++) {
         const slot = document.getElementById(`s${i+1}`);
-        // อัปเดตเฉพาะถ้าช่องนั้นยังว่าง หรือเป็นการ์ดทีมเริ่มต้น
         if(slot && (slot.children.length === 0 || slot.querySelector('.team-card'))) {
             slot.innerHTML = createTeamHTML(teams[i]);
         }
@@ -93,33 +80,23 @@ function refreshInitialSeeds() {
 }
 
 function createTeamHTML(team) {
-    return `
-        <div class="team-card" data-id="${team.id}">
-            <img src="${team.logo}" draggable="false">
-            <span>${team.name}</span>
-        </div>
-    `;
+    return `<div class="team-card" data-id="${team.id}"><img src="${team.logo}" draggable="false"><span>${team.name}</span></div>`;
 }
 
-// 5. ระบบลากวาง (SortableJS)
 function initSortable() {
+    const isViewOnly = window.location.href.includes('viewonly=true'); 
     document.querySelectorAll('.slot').forEach(el => {
         new Sortable(el, {
             group: 'bracket',
             animation: 150,
-            onEnd: () => {
-                saveAll();
-            }
+            disabled: isViewOnly,
+            onEnd: () => saveAll()
         });
     });
 }
 
-// 6. ระบบบันทึกและล้างข้อมูล
 function saveAll() {
-    // บันทึกข้อมูลทีม
     localStorage.setItem('val_teams_data', JSON.stringify(teams));
-    
-    // บันทึกตำแหน่ง UI ล่าสุดในสายการแข่ง
     const state = {};
     document.querySelectorAll('.slot').forEach(slot => {
         state[slot.id] = slot.innerHTML;
@@ -128,7 +105,7 @@ function saveAll() {
 }
 
 function loadAll() {
-    const savedUI = JSON.parse(localStorage.getItem('val_bracket_ui'));
+    const savedUI = JSON.parse(localStorage.getItem('val_bracket_ui')) || (INITIAL_DATA ? INITIAL_DATA.ui : null);
     if(savedUI) {
         Object.keys(savedUI).forEach(id => {
             const slot = document.getElementById(id);
@@ -140,13 +117,12 @@ function loadAll() {
 }
 
 function resetAll() {
-    if(confirm("คุณต้องการล้างข้อมูลการแข่งขันทั้งหมดใช่หรือไม่?")) {
+    if(confirm("ล้างข้อมูลทั้งหมด?")) {
         localStorage.clear();
         location.reload();
     }
 }
 
-// เริ่มต้นการทำงานเมื่อโหลดหน้าเว็บ
 window.onload = () => {
     renderAdmin();
     loadAll();
