@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap');
+
+body {
+    background-color: #0f1923;
+    color: #ece8e1;
+    font-family: 'Oswald', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Bracket Layout */
+.bracket-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding: 40px;
+    min-width: 1600px;
+    background-image: radial-gradient(#bd3944 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 850px;
+    width: 220px;
+}
+
+.center-final {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Slot & Team Cards */
+.slot {
+    background: #1f2326;
+    border: 1px solid #333;
+    min-height: 54px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+    position: relative;
+}
+
+.slot:hover {
+    border-color: #ff4655;
+    box-shadow: 0 0 10px rgba(255, 70, 85, 0.2);
+}
+
+.team-card {
+    background: #ff4655;
+    color: white;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    cursor: grab;
+    font-weight: bold;
+    font-size: 1.1rem;
+    user-select: none;
+}
+
+.team-card img {
+    width: 35px;
+    height: 35px;
+    margin-right: 12px;
+    background: white;
+    object-fit: cover;
+    border: 1px solid #fff;
+}
+
+/* UI Elements */
+.match-group {
+    border: 1px solid #444;
+    background: rgba(0,0,0,0.4);
+    padding: 4px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.match-label {
+    font-size: 11px;
+    color: #777;
+    text-align: center;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+#admin-panel {
+    background: #161d24;
+    border-right: 3px solid #ff4655;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 10px 0 20px rgba(0,0,0,0.5);
+}
+
+.input-card {
+    background: #1f2326;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    border-left: 3px solid #444;
+}
+
+.input-card:focus-within {
+    border-left-color: #ff4655;
+}
+
+input[type="text"] {
+    background: #0f1923;
+    border: 1px solid #333;
+    color: white;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    margin-bottom: 8px;
+    outline: none;
+}
+/* เพิ่มเติมจากไฟล์เดิม */
+#admin-panel {
+    background: #161d24;
+    border-right: 3px solid #ff4655;
+    height: 100vh;
+    overflow-y: auto;
+    position: relative;
+    z-index: 40;
+}
+
+/* คลาสสำหรับซ่อน */
+#admin-panel.hidden-panel {
+    margin-left: -320px; /* ซ่อนไปทางซ้าย */
+    opacity: 0;
+    pointer-events: none;
+}
+
+#toggle-admin {
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+}

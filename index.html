@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valorant Tournament Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex">
+
+    <button id="toggle-admin" onclick="toggleAdmin()" class="fixed top-4 left-4 z-50 bg-[#ff4655] text-white px-4 py-2 rounded shadow-2xl hover:bg-[#ff5e6a] transition-all font-bold">
+        <span id="toggle-icon">◀</span> SETTINGS
+    </button>
+
+    <aside id="admin-panel" class="w-80 shrink-0 transition-all duration-300">
+        <div class="p-5 mt-12">
+            <h2 class="text-3xl font-black text-[#ff4655] mb-6 italic uppercase">Management</h2>
+            
+            <div class="flex flex-col gap-2 mb-6">
+                <button onclick="saveAll()" class="bg-green-600 hover:bg-green-700 py-2 font-bold text-sm rounded">SAVE TO BROWSER</button>
+                <div class="flex gap-2">
+                    <button onclick="exportJSON()" class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 font-bold text-xs rounded">COPY DATA</button>
+                    <button onclick="importJSON()" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 font-bold text-xs rounded">PASTE DATA</button>
+                </div>
+                <button onclick="resetAll()" class="bg-gray-700 hover:bg-red-800 py-2 font-bold text-sm rounded">RESET ALL</button>
+            </div>
+            
+            <div id="team-list"></div>
+        </div>
+    </aside>
+
+    <main class="flex-grow overflow-x-auto">
+        <header class="text-center mt-8">
+            <h1 class="text-6xl font-black italic text-[#ff4655] tracking-tighter">VALORANT CHALLENGERS</h1>
+            <p class="text-gray-400 tracking-widest uppercase">Knockout Stage | 16 Teams</p>
+        </header>
+
+        <section class="bracket-container">
+            <div class="column">
+                <div class="match-label">LEFT ROUND OF 16</div>
+                <div class="match-group"><div class="slot" id="s1"></div><div class="slot" id="s2"></div></div>
+                <div class="match-group"><div class="slot" id="s3"></div><div class="slot" id="s4"></div></div>
+                <div class="match-group"><div class="slot" id="s5"></div><div class="slot" id="s6"></div></div>
+                <div class="match-group"><div class="slot" id="s7"></div><div class="slot" id="s8"></div></div>
+            </div>
+
+            <div class="column">
+                <div class="match-label">LEFT QUARTERS</div>
+                <div class="match-group"><div class="slot" id="l-q1"></div><div class="slot" id="l-q2"></div></div>
+                <div class="match-group"><div class="slot" id="l-q3"></div><div class="slot" id="l-q4"></div></div>
+            </div>
+
+            <div class="column">
+                <div class="match-label">LEFT SEMI</div>
+                <div class="match-group"><div class="slot" id="l-s1"></div><div class="slot" id="l-s2"></div></div>
+            </div>
+
+            <div class="center-final">
+                <div class="bg-[#ff4655] px-8 py-1 text-2xl font-black skew-x-[-15deg] mb-4">GRAND FINAL</div>
+                <div class="match-group w-72">
+                    <div class="slot h-16" id="f1"></div>
+                    <div class="slot h-16" id="f2"></div>
+                </div>
+                <div class="champion-box mt-10 p-4 border-2 border-yellow-500 rounded bg-yellow-500/10 w-72">
+                    <div class="text-yellow-500 text-center font-bold">🏆 THE CHAMPION</div>
+                    <div class="slot h-20 mt-2 border-none" id="winner"></div>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="match-label">RIGHT SEMI</div>
+                <div class="match-group"><div class="slot" id="r-s1"></div><div class="slot" id="r-s2"></div></div>
+            </div>
+
+            <div class="column">
+                <div class="match-label">RIGHT QUARTERS</div>
+                <div class="match-group"><div class="slot" id="r-q1"></div><div class="slot" id="r-q2"></div></div>
+                <div class="match-group"><div class="slot" id="r-q3"></div><div class="slot" id="r-q4"></div></div>
+            </div>
+
+            <div class="column">
+                <div class="match-label">RIGHT ROUND OF 16</div>
+                <div class="match-group"><div class="slot" id="s9"></div><div class="slot" id="s10"></div></div>
+                <div class="match-group"><div class="slot" id="s11"></div><div class="slot" id="s12"></div></div>
+                <div class="match-group"><div class="slot" id="s13"></div><div class="slot" id="s14"></div></div>
+                <div class="match-group"><div class="slot" id="s15"></div><div class="slot" id="s16"></div></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
