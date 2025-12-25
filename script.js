@@ -1,11 +1,36 @@
-// บรรทัดนี้ใช้สำหรับฝังข้อมูลให้คนอื่นเห็น (นำ JSON ที่คัดลอกมาวางแทนที่ null)
-const INITIAL_DATA = null; 
+// ==========================================
+// CONFIGURATION (ตั้งค่าที่นี่)
+// ==========================================
+const ADMIN_PASSWORD = "1234"; // เปลี่ยนรหัสผ่านของคุณที่นี่
+const INITIAL_DATA = null;     // นำ JSON ที่ Export มาวางที่นี่เพื่อให้คนอื่นเห็นข้อมูลเริ่มต้น
+
+// ==========================================
+// SYSTEM LOGIC
+// ==========================================
 
 let teams = JSON.parse(localStorage.getItem('val_teams_data')) || (INITIAL_DATA ? INITIAL_DATA.teams : Array.from({length: 16}, (_, i) => ({
     id: `team-${i}`,
     name: `TEAM ${String(i+1).padStart(2, '0')}`,
     logo: `https://api.dicebear.com/7.x/identicon/svg?seed=${i}`
 })));
+
+// ตรวจสอบรหัสผ่านเมื่อเข้าโหมด Admin
+function checkAdminAuth() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdminMode = urlParams.get('admin') === 'true';
+
+    if (isAdminMode) {
+        const password = prompt("กรุณาใส่รหัสผ่านแอดมินเพื่อเปิดการแก้ไข:");
+        if (password === ADMIN_PASSWORD) {
+            document.body.classList.add('admin-verified');
+            return true;
+        } else {
+            alert("รหัสผ่านไม่ถูกต้อง! คุณจะเข้าสู่โหมดดูอย่างเดียว");
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+    return false;
+}
 
 function toggleAdmin() {
     const panel = document.getElementById('admin-panel');
@@ -21,7 +46,7 @@ function exportJSON() {
     });
     const dataStr = JSON.stringify(state);
     navigator.clipboard.writeText(dataStr);
-    alert("คัดลอกข้อมูลสายการแข่งแล้ว!");
+    alert("คัดลอกข้อมูลสำเร็จ! นำไปวางใน INITIAL_DATA ในไฟล์ script.js");
 }
 
 function importJSON() {
@@ -32,12 +57,13 @@ function importJSON() {
             localStorage.setItem('val_teams_data', JSON.stringify(state.teams));
             localStorage.setItem('val_bracket_ui', JSON.stringify(state.ui));
             location.reload();
-        } catch (e) { alert("ข้อมูลผิดพลาด!"); }
+        } catch (e) { alert("ข้อมูลไม่ถูกต้อง!"); }
     }
 }
 
 function renderAdmin() {
     const list = document.getElementById('team-list');
+    if (!list) return;
     list.innerHTML = '';
     teams.forEach((team, i) => {
         const div = document.createElement('div');
@@ -45,7 +71,7 @@ function renderAdmin() {
         div.innerHTML = `
             <p class="text-[10px] text-gray-500 mb-1 uppercase font-bold">Slot ${i+1}</p>
             <input type="text" value="${team.name}" onchange="updateTeamName(${i}, this.value)">
-            <input type="file" accept="image/*" class="text-[10px] w-full" onchange="handleLogo(${i}, this)">
+            <input type="file" accept="image/*" class="text-[10px] w-full mt-1" onchange="handleLogo(${i}, this)">
         `;
         list.appendChild(div);
     });
@@ -84,12 +110,12 @@ function createTeamHTML(team) {
 }
 
 function initSortable() {
-    const isViewOnly = window.location.href.includes('viewonly=true'); 
+    const isVerified = document.body.classList.contains('admin-verified');
     document.querySelectorAll('.slot').forEach(el => {
         new Sortable(el, {
             group: 'bracket',
             animation: 150,
-            disabled: isViewOnly,
+            disabled: !isVerified,
             onEnd: () => saveAll()
         });
     });
@@ -124,6 +150,7 @@ function resetAll() {
 }
 
 window.onload = () => {
+    checkAdminAuth();
     renderAdmin();
     loadAll();
     initSortable();
